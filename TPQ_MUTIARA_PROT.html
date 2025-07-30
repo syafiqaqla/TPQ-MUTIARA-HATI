@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mutiara Digital - TPQ Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .toast {
+            animation: slideIn 0.3s ease-out, fadeOut 0.5s ease-out 2.5s forwards;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; }
+        }
+        .surah-badge {
+            font-family: 'Traditional Arabic', Arial, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 hidden">
+        <div class="toast bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg flex items-center">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span id="toast-message">Operation successful</span>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-green-800 text-white shadow-md">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-mosque text-2xl"></i>
+                    <h1 class="text-xl md:text-2xl font-bold">Mutiara Digital TPQ</h1>
+                </div>
+                <div class="text-sm">
+                    <span id="current-date" class="hidden md:inline"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation and Content -->
+        <div class="flex flex-1">
+            <!-- Sidebar Navigation -->
+            <nav class="w-64 bg-green-700 text-white hidden md:block">
+                <div class="p-4">
+                    <div class="flex items-center space-x-2 mb-6">
+                        <i class="fas fa-user-shield"></i>
+                        <span class="font-semibold">Admin Panel</span>
+                    </div>
+                    <ul class="space-y-2">
+                        <li>
+                            <button onclick="showSection('dashboard')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-green-600 transition flex items-center nav-link active">
+                                <i class="fas fa-tachometer-alt mr-3"></i> Dashboard
+                            </button>
+                        </li>
+                        <li>
+                            <button onclick="showSection('students')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-green-600 transition flex items-center nav-link">
+                                <i class="fas fa-users mr-3"></i> Students
+                            </button>
+                        </li>
+                        <li>
+                            <button onclick="showSection('teachers')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-green-600 transition flex items-center nav-link">
+                                <i class="fas fa-chalkboard-teacher mr-3"></i> Teachers
+                            </button>
+                        </li>
+                        <li>
+                            <button onclick="showSection('progress')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-green-600 transition flex items-center nav-link">
+                                <i class="fas fa-chart-line mr-3"></i> Progress
+                            </button>
+                        </li>
+                        <li>
+                            <button onclick="showSection('quran')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-green-600 transition flex items-center nav-link">
+                                <i class="fas fa-quran mr-3"></i> Al-Qur'an Data
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Mobile Navigation -->
+            <div class="md:hidden fixed bottom-0 left-0 right-0 bg-green-800 text-white z-10">
+                <div class="flex justify-around py-2">
+                    <button onclick="showSection('dashboard')" class="flex flex-col items-center p-2 text-xs nav-link active">
+                        <i class="fas fa-tachometer-alt mb-1"></i>
+                        <span>Dashboard</span>
+                    </button>
+                    <button onclick="showSection('students')" class="flex flex-col items-center p-2 text-xs nav-link">
+                        <i class="fas fa-users mb-1"></i>
+                        <span>Students</span>
+                    </button>
+                    <button onclick="showSection('teachers')" class="flex flex-col items-center p-2 text-xs nav-link">
+                        <i class="fas fa-chalkboard-teacher mb-1"></i>
+                        <span>Teachers</span>
+                    </button>
+                    <button onclick="showSection('progress')" class="flex flex-col items-center p-2 text-xs nav-link">
+                        <i class="fas fa-chart-line mb-1"></i>
+                        <span>Progress</span>
+                    </button>
+                    <button onclick="showSection('quran')" class="flex flex-col items-center p-2 text-xs nav-link">
+                        <i class="fas fa-quran mb-1"></i>
+                        <span>Qur'an</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <main class="flex-1 p-4 md:p-6 overflow-auto mb-16 md:mb-0">
+                <!-- Dashboard Section -->
+                <section id="dashboard-section" class="section-content fade-in">
+                    <div class="mb-6 flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-green-800">Dashboard</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <!-- Stats Cards -->
+                        <div class="bg-white p-4 rounded-lg shadow border-l-4 border-green-600">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-gray-500">Total Students</p>
+                                    <h3 class="text-2xl font-bold" id="total-students">0</h3>
+                                </div>
+                                <i class="fas fa-users text-green-600 text-3xl"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow border-l-4 border-blue-600">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-gray-500">Total Teachers</p>
+                                    <h3 class="text-2xl font-bold" id="total-teachers">0</h3>
+                                </div>
+                                <i class="fas fa-chalkboard-teacher text-blue-600 text-3xl"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow border-l-4 border-yellow-600">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-gray-500">Active Classes</p>
+                                    <h3 class="text-2xl font-bold" id="total-classes">0</h3>
+                                </div>
+                                <i class="fas fa-school text-yellow-600 text-3xl"></i>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow border-l-4 border-purple-600">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-gray-500">Memorized Ayahs</p>
+                                    <h3 class="text-2xl font-bold" id="total-ayahs">0</h3>
+                                </div>
+                                <i class="fas fa-quran text-purple-600 text-3xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Recent Students -->
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="text-lg font-semibold mb-3 text-green-800 flex items-center">
+                                <i class="fas fa-users mr-2"></i> Recent Students
+                            </h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full">
+                                    <thead>
+                                        <tr class="bg-gray-100 text-left text-gray-700">
+                                            <th class="p-2">Name</th>
+                                            <th class="p-2">Class</th>
+                                            <th class="p-2">Level</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recent-students">
+                                        <!-- Filled by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Recent Progress -->
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="text-lg font-semibold mb-3 text-green-800 flex items-center">
+                                <i class="fas fa-chart-line mr-2"></i> Recent Progress
+                            </h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full">
+                                    <thead>
+                                        <tr class="bg-gray-100 text-left text-gray-700">
+                                            <th class="p-2">Student</th>
+                                            <th class="p-2">Surah</th>
+                                            <th class="p-2">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recent-progress">
+                                        <!-- Filled by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Students Section -->
+                <section id="students-section" class="section-content hidden">
+                    <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0">
+                        <h2 class="text-2xl font-bold text-green-800">Student Management</h2>
+                        <div class="flex space-x-2">
+                            <button onclick="showStudentForm()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center">
+                                <i class="fas fa-plus mr-2"></i> Add Student
+                            </button>
+                            <div class="relative">
+                                <input type="text" id="student-search" placeholder="Search students..." class="border border-gray-300 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Student Form (Hidden by default) -->
+                    <div id="student-form-container" class="hidden bg-white p-4 rounded-lg shadow mb-6">
+                        <h3 class="text-lg font-semibold mb-4" id="student-form-title">Add New Student</h3>
+                        <form id="student-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="hidden" id="student-id">
+                            <div>
+                                <label for="student-name" class="block text-gray-700 mb-1">Full Name</label>
+                                <input type="text" id="student-name" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            </div>
+                            <div>
+                                <label for="student-gender" class="block text-gray-700 mb-1">Gender</label>
+                                <select id="student-gender" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="student-birthdate" class="block text-gray-700 mb-1">Birth Date</label>
+                                <input type="date" id="student-birthdate" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            </div>
+                            <div>
+                                <label for="student-phone" class="block text-gray-700 mb-1">Parent's Phone</label>
+                                <input type="tel" id="student-phone" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                            </div>
+                            <div>
+                                <label for="student-address" class="block text-gray-700 mb-1">Address</label>
+                                <textarea id="student-address" rows="2" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"></textarea>
+                            </div>
+                            <div>
+                                <label for="student-class" class="block text-gray-700 mb-1">Class</label>
+                                <select id="student-class" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                                    <option value="">Select Class</option>
+                                    <option value="Tahfidz A">Tahfidz A</option>
+                                    <option value="Tahfidz B">Tahfidz B</option>
+                                    <option value="Tahsin A">Tahsin A</option>
+                                    <option value="Tahsin B">Tahsin B</option>
+                                    <option value="Tilawah">Tilawah</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="student-level" class="block text-gray-700 mb-1">Level</label>
+                                <select id="student-level" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                                    <option value="">Select Level</option>
+                                    <option value="Beginner">Beginner</option>
+                                    <option value="Intermediate">Intermediate</option>
+                                    <option value="Advanced">Advanced</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2 flex justify-end space-x-2">
+                                <button type="button" onclick="hideStudentForm()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                                    Save Student
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Students Table -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead class="bg-green-700 text-white">
+                                    <tr>
+                                        <th class="p-3 text-left">Name</th>
+                                        <th class="p-3 text-left">Class</th>
+                                        <th class="p-3 text-left">Level</th>
+                                        <th class="p-3 text-left">Gender</th>
+                                        <th class="p-3 text-left">Age</th>
+                                        <th class="p-3 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="students-table-body" class="divide-y divide-gray-200">
+                                    <!-- Filled by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Teachers Section -->
+                <section id="teachers-section" class="section-content hidden">
+                    <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0">
+                        <h2 class="text-2xl font-bold text-green-800">Teacher Management</h2>
+                        <div class="flex space-x-2">
+                            <button onclick="showTeacherForm()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center">
+                                <i class="fas fa-plus mr-2"></i> Add Teacher
+                            </button>
+                            <div class="relative">
+                                <input type="text" id="teacher-search" placeholder="Search teachers..." class="border border-gray-300 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Teacher Form (Hidden by default) -->
+                    <div id="teacher-form-container" class="hidden bg-white p-4 rounded-lg shadow mb-6">
+                        <h3 class="text-lg font-semibold mb-4" id="teacher-form-title">Add New Teacher</h3>
+                        <form id="teacher-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="hidden" id="teacher-id">
+                            <div>
+                                <label for="teacher-name" class="block text-gray-700 mb-1">Full Name</label>
+                                <input type="text" id="teacher-name" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            </div>
+                            <div>
+                                <label for="teacher-gender" class="block text-gray-700 mb-1">Gender</label>
+                                <select id="teacher-gender" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="teacher-phone" class="block text-gray-700 mb-1">Phone Number</label>
+                                <input type="tel" id="teacher-phone" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            </div>
+                            <div>
+                                <label for="teacher-email" class="block text-gray-700 mb-1">Email</label>
+                                <input type="email" id="teacher-email" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                            </div>
+                            <div>
+                                <label for="teacher-address" class="block text-gray-700 mb-1">Address</label>
+                                <textarea id="teacher-address" rows="2" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"></textarea>
+                            </div>
+                            <div>
+                                <label for="teacher-classes" class="block text-gray-700 mb-1">Classes Handled</label>
+                                <select id="teacher-classes" multiple class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                                    <option value="Tahfidz A">Tahfidz A</option>
+                                    <option value="Tahfidz B">Tahfidz B</option>
+                                    <option value="Tahsin A">Tahsin A</option>
+                                    <option value="Tahsin B">Tahsin B</option>
+                                    <option value="Tilawah">Tilawah</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="teacher-schedule" class="block text-gray-700 mb-1">Teaching Schedule</label>
+                                <textarea id="teacher-schedule" rows="2" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Example: Monday 08:00-10:00, Wednesday 13:00-15:00"></textarea>
+                            </div>
+                            <div>
+                                <label for="teacher-status" class="block text-gray-700 mb-1">Status</label>
+                                <select id="teacher-status" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2 flex justify-end space-x-2">
+                                <button type="button" onclick="hideTeacherForm()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                                    Save Teacher
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Teachers Table -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead class="bg-green-700 text-white">
+                                    <tr>
+                                        <th class="p-3 text-left">Name</th>
+                                        <th class="p-3 text-left">Phone</th>
+                                        <th class="p-3 text-left">Classes</th>
+                                        <th class="p-3 text-left">Status</th>
+                                        <th class="p-3 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="teachers-table-body" class="divide-y divide-gray-200">
+                                    <!-- Filled by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Progress Section -->
+                <section id="progress-section" class="section-content hidden">
+                    <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0">
+                        <h2 class="text-2xl font-bold text-green-800">Student Progress Tracking</h2>
+                        <div class="flex space-x-2">
+                            <button onclick="showProgressForm()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center">
+                                <i class="fas fa-plus mr-2"></i> Add Progress
+                            </button>
+                            <div class="relative">
+                                <input type="text" id="progress-search" placeholder="Search progress..." class="border border-gray-300 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Filters -->
+                    <div class="bg-white p-4 rounded-lg shadow mb-6">
+                        <h3 class="text-lg font-semibold mb-3 text-green-800">Filters</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label for="filter-student" class="block text-gray-700 mb-1">Student</label>
+                                <select id="filter-student" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                    <option value="">All Students</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="filter-class" class="block text-gray-700 mb-1">Class</label>
+                                <select id="filter-class" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                    <option value="">All Classes</option>
+                                    <option value="Tahfidz A">Tahfidz A</option>
+                                    <option value="Tahfidz B">Tahfidz B</option>
+                                    <option value="Tahsin A">Tahsin A</option>
+                                    <option value="Tahsin B">Tahsin B</option>
+                                    <option value="Tilawah">Tilawah</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="filter-surah" class="block text-gray-700 mb-1">Surah</label>
+                                <select id="filter-surah" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                    <option value="">All Surahs</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="filter-status" class="block text-gray-700 mb-1">Status</label>
+                                <select id="filter-status" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                    <option value="">All Status</option>
+                                    <option value="Memorized">Memorized</option>
+                                    <option value="Reading">Reading</option>
+                                    <option value="Review">Review</option>
+                                    <option value="Struggling">Struggling</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Form (Hidden by default) -->
+                    <div id="progress-form-container" class="hidden bg-white p-4 rounded-lg shadow mb-6">
+                        <h3 class="text-lg font-semibold mb-4" id="progress-form-title">Add New Progress</h3>
+                        <form id="progress-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="hidden" id="progress-id">
+                            <div>
+                                <label for="progress-student" class="block text-gray-700 mb-1">Student</label>
+                                <select id="progress-student" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                                    <option value="">Select Student</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="progress-date" class="block text-gray-700 mb-1">Date</label>
+                                <input type="date" id="progress-date" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            </div>
+                            <div>
+                                <label for="progress-surah" class="block text-gray-700 mb-1">Surah</label>
+                                <select id="progress-surah" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                                    <option value="">Select Surah</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="progress-ayah" class="block text-gray-700 mb-1">Ayah Range</label>
+                                <div class="flex items-center space-x-2">
+                                    <input type="number" id="progress-ayah-from" placeholder="From" class="w-1/2 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                                    <span>to</span>
+                                    <input type="number" id="progress-ayah-to" placeholder="To" class="w-1/2 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="progress-status" class="block text-gray-700 mb-1">Status</label>
+                                <select id="progress-status" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                                    <option value="">Select Status</option>
+                                    <option value="Memorized">Memorized</option>
+                                    <option value="Reading">Reading</option>
+                                    <option value="Review">Review</option>
+                                    <option value="Struggling">Struggling</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="progress-notes" class="block text-gray-700 mb-1">Notes</label>
+                                <textarea id="progress-notes" rows="2" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"></textarea>
+                            </div>
+                            <div class="md:col-span-2 flex justify-end space-x-2">
+                                <button type="button" onclick="hideProgressForm()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                                    Save Progress
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Progress Table -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead class="bg-green-700 text-white">
+                                    <tr>
+                                        <th class="p-3 text-left">Student</th>
+                                        <th class="p-3 text-left">Surah</th>
+                                        <th class="p-3 text-left">Ayahs</th>
+                                        <th class="p-3 text-left">Status</th>
+                                        <th class="p-3 text-left">Date</th>
+                                        <th class="p-3 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="progress-table-body" class="divide-y divide-gray-200">
+                                    <!-- Filled by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Quran Section -->
+                <section id="quran-section" class="section-content hidden">
+                    <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0">
+                        <h2 class="text-2xl font-bold text-green-800">Al-Qur'an Data Management</h2>
+                        <div class="flex space-x-2">
+                            <button onclick="showSurahForm()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center">
+                                <i class="fas fa-plus mr-2"></i> Add Surah
+                            </button>
+                            <div class="relative">
+                                <input type="text" id="surah-search" placeholder="Search surahs..." class="border border-gray-300 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Surah Form (Hidden by default) -->
+                    <div id="surah-form-container" class="hidden bg-white p-4 rounded-lg shadow mb-6">
+                        <h3 class="text-lg font-semibold mb-4" id="surah-form-title">Add New Surah</h3>
+                        <form id="surah-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="hidden" id="surah-id">
+                            <div>
+                                <label for="surah-number" class="block text-gray-700 mb-1">Surah Number</label>
+                                <input type="number" id="surah-number" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            </div>
+                            <div>
+                                <label for="surah-name" class="block text-gray-700 mb-1">Surah Name (English)</label>
+                                <input type="text" id="surah-name" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            </div>
+                            <div>
+                                <label for="surah-arabic" class="block text-gray-700 mb-1">Surah Name (Arabic)</label>
+                                <input type="text" id="surah-arabic" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-right font-arabic focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            </div>
+                            <div>
+                                <label for="surah-ayat" class="block text-gray-700 mb-1">Total Ayahs</label>
+                                <input type="number" id="surah-ayat" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            </div>
+                            <div>
+                                <label for="surah-type" class="block text-gray-700 mb-1">Revelation Type</label>
+                                <select id="surah-type" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                                    <option value="Meccan">Meccan</option>
+                                    <option value="Medinan">Medinan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="surah-juz" class="block text-gray-700 mb-1">Main Juz</label>
+                                <input type="text" id="surah-juz" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                            </div>
+                            <div class="md:col-span-2 flex justify-end space-x-2">
+                                <button type="button" onclick="hideSurahForm()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                                    Save Surah
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Surahs Table -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead class="bg-green-700 text-white">
+                                    <tr>
+                                        <th class="p-3 text-left">No.</th>
+                                        <th class="p-3 text-left">Name (English)</th>
+                                        <th class="p-3 text-left">Name (Arabic)</th>
+                                        <th class="p-3 text-left">Ayahs</th>
+                                        <th class="p-3 text-left">Type</th>
+                                        <th class="p-3 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="surahs-table-body" class="divide-y divide-gray-200">
+                                    <!-- Filled by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full">
+            <div class="flex items-center mb-4">
+                <i class="fas fa-exclamation-triangle text-yellow-500 mr-2 text-xl"></i>
+                <h3 class="text-lg font-semibold" id="confirmation-title">Confirm Action</h3>
+            </div>
+            <p id="confirmation-message">Are you sure you want to perform this action?</p>
+            <div class="flex justify-end space-x-3 mt-6">
+                <button onclick="hideConfirmationModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg">
+                    Cancel
+                </button>
+                <button id="confirmation-action" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize data
+        let students = JSON.parse(localStorage.getItem('students')) || [
+            { id: 1, name: 'Ahmad Fauzi', gender: 'Male', birthdate: '2015-03-12', phone: '081234567890', address: 'Jl. Merdeka No. 123', class: 'Tahfidz A', level: 'Intermediate' },
+            { id: 2, name: 'Siti Aminah', gender: 'Female', birthdate: '2016-07-21', phone: '082345678901', address: 'Jl. Pahlawan No. 45', class: 'Tahsin B', level: 'Beginner' },
+            { id: 3, name: 'Muhammad Rizky', gender: 'Male', birthdate: '2014-11-05', phone: '083456789012', address: 'Jl. Diponegoro No. 67', class: 'Tahfidz B', level: 'Advanced' },
+            { id: 4, name: 'Nurul Huda', gender: 'Female', birthdate: '2015-09-15', phone: '084567890123', address: 'Jl. Sudirman No. 89', class: 'Tilawah', level: 'Intermediate' }
+        ];
+
+        let teachers = JSON.parse(localStorage.getItem('teachers')) || [
+            { id: 1, name: 'Ustadz Abdullah', gender: 'Male', phone: '085678901234', email: 'abdullah@tpq.edu', address: 'Jl. Pendidikan No. 10', classes: ['Tahfidz A', 'Tahfidz B'], schedule: 'Monday 08:00-10:00, Wednesday 13:00-15:00', status: 'Active' },
+            { id: 2, name: 'Ustadzah Fatimah', gender: 'Female', phone: '086789012345', email: 'fatimah@tpq.edu', address: 'Jl. Ilmu No. 20', classes: ['Tahsin A', 'Tahsin B'], schedule: 'Tuesday 09:00-11:00, Thursday 14:00-16:00', status: 'Active' }
+        ];
+
+        let progress = JSON.parse(localStorage.getItem('progress')) || [
+            { id: 1, studentId: 1, date: '2023-05-10', surah: 'Al-Fatihah', ayahFrom: 1, ayahTo: 7, status: 'Memorized', notes: 'Excellent memorization' },
+            { id: 2, studentId: 2, date: '2023-05-12', surah: 'Al-Baqarah', ayahFrom: 1, ayahTo: 5, status: 'Reading', notes: 'Needs improvement in tajweed' },
+            { id: 3, studentId: 3, date: '2023-05-15', surah: 'Al-Ikhlas', ayahFrom: 1, ayahTo: 4, status: 'Memorized', notes: 'Perfect recitation' },
+            { id: 4, studentId: 1, date: '2023-05-18', surah: 'Al-Baqarah', ayahFrom: 255, ayahTo: 255, status: 'Memorized', notes: 'Ayatul Kursi memorized' }
+        ];
+
+        let surahs = JSON.parse(localStorage.getItem('surahs')) || [
+            { id: 1, number: 1, name: 'Al-Fatihah', arabic: 'الفاتحة', ayat: 7, type: 'Meccan', juz: '1' },
+            { id: 2, number: 2, name: 'Al-Baqarah', arabic: 'البقرة', ayat: 286, type: 'Medinan', juz: '1-3' },
+            { id: 3, number: 112, name: 'Al-Ikhlas', arabic: 'الإخلاص', ayat: 4, type: 'Meccan', juz: '30' },
+            { id: 4, number: 114, name: 'An-Nas', arabic: 'الناس', ayat: 6, type: 'Meccan', juz: '30' }
+        ];
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('students', JSON.stringify(students));
+            localStorage.setItem('teachers', JSON.stringify(teachers));
+            localStorage.setItem('progress', JSON.stringify(progress));
+            localStorage.setItem('surahs', JSON.stringify(surahs));
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            
+            toastMessage.textContent = message;
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Show confirmation modal
+        let currentAction = null;
+        function showConfirmationModal(title, message, action) {
+            const modal = document.getElementById('confirmation-modal');
+            const modalTitle = document.getElementById('confirmation-title');
+            const modalMessage = document.getElementById('confirmation-message');
+            const modalAction = document.getElementById('confirmation-action');
+            
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            currentAction = action;
+            
+            modal.classList.remove('hidden');
+        }
+
+        // Hide confirmation modal
+        function hideConfirmationModal() {
+            const modal = document.getElementById('confirmation-modal');
+            modal.classList.add('hidden');
+        }
+
+        // Execute confirmed action
+        document.getElementById('confirmation-action').addEventListener('click', function() {
+            if (currentAction) {
+                currentAction();
+                hideConfirmationModal();
+            }
+        });
+
+        // Navigation functions
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section-content').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('fade-in');
+            });
+            
+            // Show selected section
+            const section = document.getElementById(`${sectionId}-section`);
+            section.classList.remove('hidden');
+            setTimeout(() => {
+                section.classList.add('fade-in');
+            }, 10);
+            
+            // Update active nav link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // For mobile and desktop nav
+            if (sectionId === 'dashboard') {
+                document.querySelectorAll('.nav-link')[0].classList.add('active');
+            } else if (sectionId === 'students') {
+                document.querySelectorAll('.nav-link')[1].classList.add('active');
+            } else if (sectionId === 'teachers') {
+                document.querySelectorAll('.nav-link')[2].classList.add('active');
+            } else if (sectionId === 'progress') {
+                document.querySelectorAll('.nav-link')[3].classList.add('active');
+            } else if (sectionId === 'quran') {
+                document.querySelectorAll('.nav-link')[4].classList.add('active');
+            }
+            
+            // Load data for the section
+            if (sectionId === 'dashboard') {
+                loadDashboard();
+            } else if (sectionId === 'students') {
+                loadStudents();
+            } else if (sectionId === 'teachers') {
+                loadTeachers();
+            } else if (sectionId === 'progress') {
+                loadProgress();
+            } else if (sectionId === 'quran') {
+                loadSurahs();
+            }
+        }
+
+        // Calculate age from birthdate
+        function calculateAge(birthdate) {
+            const birthDate = new Date(birthdate);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            
+            return age;
+        }
+
+        // Dashboard functions
+        function loadDashboard() {
+            // Update stats
+            document.getElementById('total-students').textContent = students.length;
+            document.getElementById('total-teachers').textContent = teachers.length;
+            
+            const uniqueClasses = [...new Set(students.map(student => student.class))];
+            document.getElementById('total-classes').textContent = uniqueClasses.length;
+            
+            const memorizedAyahs = progress.filter(p => p.status === 'Memorized').length;
+            document.getElementById('total-ayahs').textContent = memorizedAyahs;
+            
+            // Recent students
+            const recentStudentsTable = document.getElementById('recent-students');
+            recentStudentsTable.innerHTML = '';
+            
+            const recentStudents = students.slice(0, 5).map(student => {
+                return `
+                    <tr>
+                        <td class="p-2">${student.name}</td>
+                        <td class="p-2">${student.class}</td>
+                        <td class="p-2">${student.level}</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            recentStudentsTable.innerHTML = recentStudents;
+            
+            // Recent progress
+            const recentProgressTable = document.getElementById('recent-progress');
+            recentProgressTable.innerHTML = '';
+            
+            const recentProgress = progress.slice(0, 5).map(p => {
+                const student = students.find(s => s.id === p.studentId);
+                return `
+                    <tr>
+                        <td class="p-2">${student ? student.name : 'Unknown'}</td>
+                        <td class="p-2">${p.surah}</td>
+                        <td class="p-2">
+                            <span class="px-2 py-1 rounded-full text-xs ${p.status === 'Memorized' ? 'bg-green-100 text-green-800' : 
+                                p.status === 'Reading' ? 'bg-blue-100 text-blue-800' : 
+                                p.status === 'Review' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
+                                ${p.status}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            recentProgressTable.innerHTML = recentProgress;
+        }
+
+        // Student functions
+        function loadStudents() {
+            const tableBody = document.getElementById('students-table-body');
+            tableBody.innerHTML = '';
+            
+            students.forEach(student => {
+                const age = calculateAge(student.birthdate);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="p-3">${student.name}</td>
+                    <td class="p-3">${student.class}</td>
+                    <td class="p-3">${student.level}</td>
+                    <td class="p-3">${student.gender}</td>
+                    <td class="p-3">${age}</td>
+                    <td class="p-3 text-right">
+                        <button onclick="editStudent(${student.id})" class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded-lg mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteStudentPrompt(${student.id})" class="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded-lg">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Populate student filter in progress section
+            const studentFilter = document.getElementById('filter-student');
+            const progressStudent = document.getElementById('progress-student');
+            
+            studentFilter.innerHTML = '<option value="">All Students</option>';
+            progressStudent.innerHTML = '<option value="">Select Student</option>';
+            
+            students.forEach(student => {
+                studentFilter.innerHTML += `<option value="${student.id}">${student.name} (${student.class})</option>`;
+                progressStudent.innerHTML += `<option value="${student.id}">${student.name} (${student.class})</option>`;
+            });
+        }
+
+        function showStudentForm() {
+            document.getElementById('student-form-container').classList.remove('hidden');
+            document.getElementById('student-form-title').textContent = 'Add New Student';
+            document.getElementById('student-form').reset();
+            document.getElementById('student-id').value = '';
+        }
+
+        function hideStudentForm() {
+            document.getElementById('student-form-container').classList.add('hidden');
+        }
+
+        function editStudent(id) {
+            const student = students.find(s => s.id === id);
+            if (student) {
+                document.getElementById('student-form-container').classList.remove('hidden');
+                document.getElementById('student-form-title').textContent = 'Edit Student';
+                
+                document.getElementById('student-id').value = student.id;
+                document.getElementById('student-name').value = student.name;
+                document.getElementById('student-gender').value = student.gender;
+                document.getElementById('student-birthdate').value = student.birthdate;
+                document.getElementById('student-phone').value = student.phone;
+                document.getElementById('student-address').value = student.address;
+                document.getElementById('student-class').value = student.class;
+                document.getElementById('student-level').value = student.level;
+            }
+        }
+
+        function deleteStudentPrompt(id) {
+            const student = students.find(s => s.id === id);
+            if (student) {
+                showConfirmationModal(
+                    'Delete Student',
+                    `Are you sure you want to delete ${student.name}? This action cannot be undone.`,
+                    () => deleteStudent(id)
+                );
+            }
+        }
+
+        function deleteStudent(id) {
+            students = students.filter(s => s.id !== id);
+            saveData();
+            loadStudents();
+            showToast('Student deleted successfully');
+        }
+
+        document.getElementById('student-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('student-id').value;
+            const name = document.getElementById('student-name').value;
+            const gender = document.getElementById('student-gender').value;
+            const birthdate = document.getElementById('student-birthdate').value;
+            const phone = document.getElementById('student-phone').value;
+            const address = document.getElementById('student-address').value;
+            const studentClass = document.getElementById('student-class').value;
+            const level = document.getElementById('student-level').value;
+            
+            if (id) {
+                // Update existing student
+                const index = students.findIndex(s => s.id === parseInt(id));
+                if (index !== -1) {
+                    students[index] = {
+                        id: parseInt(id),
+                        name,
+                        gender,
+                        birthdate,
+                        phone,
+                        address,
+                        class: studentClass,
+                        level
+                    };
+                    
+                    showToast('Student updated successfully');
+                }
+            } else {
+                // Add new student
+                const newId = students.length > 0 ? Math.max(...students.map(s => s.id)) + 1 : 1;
+                students.push({
+                    id: newId,
+                    name,
+                    gender,
+                    birthdate,
+                    phone,
+                    address,
+                    class: studentClass,
+                    level
+                });
+                
+                showToast('Student added successfully');
+            }
+            
+            saveData();
+            loadStudents();
+            hideStudentForm();
+        });
+
+        // Teacher functions
+        function loadTeachers() {
+            const tableBody = document.getElementById('teachers-table-body');
+            tableBody.innerHTML = '';
+            
+            teachers.forEach(teacher => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="p-3">${teacher.name}</td>
+                    <td class="p-3">${teacher.phone}</td>
+                    <td class="p-3">${Array.isArray(teacher.classes) ? teacher.classes.join(', ') : teacher.classes}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-1 rounded-full text-xs ${teacher.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                            ${teacher.status}
+                        </span>
+                    </td>
+                    <td class="p-3 text-right">
+                        <button onclick="editTeacher(${teacher.id})" class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded-lg mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteTeacherPrompt(${teacher.id})" class="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded-lg">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function showTeacherForm() {
+            document.getElementById('teacher-form-container').classList.remove('hidden');
+            document.getElementById('teacher-form-title').textContent = 'Add New Teacher';
+            document.getElementById('teacher-form').reset();
+            document.getElementById('teacher-id').value = '';
+        }
+
+        function hideTeacherForm() {
+            document.getElementById('teacher-form-container').classList.add('hidden');
+        }
+
+        function editTeacher(id) {
+            const teacher = teachers.find(t => t.id === id);
+            if (teacher) {
+                document.getElementById('teacher-form-container').classList.remove('hidden');
+                document.getElementById('teacher-form-title').textContent = 'Edit Teacher';
+                
+                document.getElementById('teacher-id').value = teacher.id;
+                document.getElementById('teacher-name').value = teacher.name;
+                document.getElementById('teacher-gender').value = teacher.gender;
+                document.getElementById('teacher-phone').value = teacher.phone;
+                document.getElementById('teacher-email').value = teacher.email || '';
+                document.getElementById('teacher-address').value = teacher.address || '';
+                
+                // Set selected classes
+                const classesSelect = document.getElementById('teacher-classes');
+                Array.from(classesSelect.options).forEach(option => {
+                    option.selected = teacher.classes.includes(option.value);
+                });
+                
+                document.getElementById('teacher-schedule').value = teacher.schedule || '';
+                document.getElementById('teacher-status').value = teacher.status || 'Active';
+            }
+        }
+
+        function deleteTeacherPrompt(id) {
+            const teacher = teachers.find(t => t.id === id);
+            if (teacher) {
+                showConfirmationModal(
+                    'Delete Teacher',
+                    `Are you sure you want to delete ${teacher.name}? This action cannot be undone.`,
+                    () => deleteTeacher(id)
+                );
+            }
+        }
+
+        function deleteTeacher(id) {
+            teachers = teachers.filter(t => t.id !== id);
+            saveData();
+            loadTeachers();
+            showToast('Teacher deleted successfully');
+        }
+
+        document.getElementById('teacher-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('teacher-id').value;
+            const name = document.getElementById('teacher-name').value;
+            const gender = document.getElementById('teacher-gender').value;
+            const phone = document.getElementById('teacher-phone').value;
+            const email = document.getElementById('teacher-email').value;
+            const address = document.getElementById('teacher-address').value;
+            
+            const classesSelect = document.getElementById('teacher-classes');
+            const classes = Array.from(classesSelect.selectedOptions).map(option => option.value);
+            
+            const schedule = document.getElementById('teacher-schedule').value;
+            const status = document.getElementById('teacher-status').value;
+            
+            if (id) {
+                // Update existing teacher
+                const index = teachers.findIndex(t => t.id === parseInt(id));
+                if (index !== -1) {
+                    teachers[index] = {
+                        id: parseInt(id),
+                        name,
+                        gender,
+                        phone,
+                        email,
+                        address,
+                        classes,
+                        schedule,
+                        status
+                    };
+                    
+                    showToast('Teacher updated successfully');
+                }
+            } else {
+                // Add new teacher
+                const newId = teachers.length > 0 ? Math.max(...teachers.map(t => t.id)) + 1 : 1;
+                teachers.push({
+                    id: newId,
+                    name,
+                    gender,
+                    phone,
+                    email,
+                    address,
+                    classes,
+                    schedule,
+                    status
+                });
+                
+                showToast('Teacher added successfully');
+            }
+            
+            saveData();
+            loadTeachers();
+            hideTeacherForm();
+        });
+
+        // Progress functions
+        function loadProgress() {
+            const tableBody = document.getElementById('progress-table-body');
+            tableBody.innerHTML = '';
+            
+            const filterStudent = document.getElementById('filter-student').value;
+            const filterClass = document.getElementById('filter-class').value;
+            const filterSurah = document.getElementById('filter-surah').value;
+            const filterStatus = document.getElementById('filter-status').value;
+            
+            let filteredProgress = [...progress];
+            
+            if (filterStudent) {
+                filteredProgress = filteredProgress.filter(p => p.studentId === parseInt(filterStudent));
+            }
+            
+            if (filterClass) {
+                filteredProgress = filteredProgress.filter(p => {
+                    const student = students.find(s => s.id === p.studentId);
+                    return student && student.class === filterClass;
+                });
+            }
+            
+            if (filterSurah) {
+                filteredProgress = filteredProgress.filter(p => p.surah === filterSurah);
+            }
+            
+            if (filterStatus) {
+                filteredProgress = filteredProgress.filter(p => p.status === filterStatus);
+            }
+            
+            filteredProgress.forEach(p => {
+                const student = students.find(s => s.id === p.studentId);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="p-3">${student ? student.name : 'Unknown'}</td>
+                    <td class="p-3">${p.surah}</td>
+                    <td class="p-3">${p.ayahFrom}${p.ayahTo !== p.ayahFrom ? `-${p.ayahTo}` : ''}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-1 rounded-full text-xs ${p.status === 'Memorized' ? 'bg-green-100 text-green-800' : 
+                            p.status === 'Reading' ? 'bg-blue-100 text-blue-800' : 
+                            p.status === 'Review' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
+                            ${p.status}
+                        </span>
+                    </td>
+                    <td class="p-3">${p.date}</td>
+                    <td class="p-3 text-right">
+                        <button onclick="editProgress(${p.id})" class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded-lg mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteProgressPrompt(${p.id})" class="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded-lg">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function showProgressForm() {
+            document.getElementById('progress-form-container').classList.remove('hidden');
+            document.getElementById('progress-form-title').textContent = 'Add New Progress';
+            document.getElementById('progress-form').reset();
+            document.getElementById('progress-id').value = '';
+            document.getElementById('progress-date').value = new Date().toISOString().split('T')[0];
+            
+            // Populate surah dropdown
+            const surahSelect = document.getElementById('progress-surah');
+            surahSelect.innerHTML = '<option value="">Select Surah</option>';
+            surahs.forEach(surah => {
+                surahSelect.innerHTML += `<option value="${surah.name}">${surah.number}. ${surah.name}</option>`;
+            });
+        }
+
+        function hideProgressForm() {
+            document.getElementById('progress-form-container').classList.add('hidden');
+        }
+
+        function editProgress(id) {
+            const prog = progress.find(p => p.id === id);
+            if (prog) {
+                document.getElementById('progress-form-container').classList.remove('hidden');
+                document.getElementById('progress-form-title').textContent = 'Edit Progress';
+                
+                document.getElementById('progress-id').value = prog.id;
+                document.getElementById('progress-student').value = prog.studentId;
+                document.getElementById('progress-date').value = prog.date;
+                
+                // Populate surah dropdown and set selected value
+                const surahSelect = document.getElementById('progress-surah');
+                surahSelect.innerHTML = '<option value="">Select Surah</option>';
+                surahs.forEach(surah => {
+                    surahSelect.innerHTML += `<option value="${surah.name}" ${surah.name === prog.surah ? 'selected' : ''}>${surah.number}. ${surah.name}</option>`;
+                });
+                
+                document.getElementById('progress-ayah-from').value = prog.ayahFrom;
+                document.getElementById('progress-ayah-to').value = prog.ayahTo;
+                document.getElementById('progress-status').value = prog.status;
+                document.getElementById('progress-notes').value = prog.notes || '';
+            }
+        }
+
+        function deleteProgressPrompt(id) {
+            const prog = progress.find(p => p.id === id);
+            if (prog) {
+                const student = students.find(s => s.id === prog.studentId);
+                showConfirmationModal(
+                    'Delete Progress',
+                    `Are you sure you want to delete progress record for ${student ? student.name : 'student'} (${prog.surah} ${prog.ayahFrom}-${prog.ayahTo})?`,
+                    () => deleteProgress(id)
+                );
+            }
+        }
+
+        function deleteProgress(id) {
+            progress = progress.filter(p => p.id !== id);
+            saveData();
+            loadProgress();
+            showToast('Progress record deleted successfully');
+        }
+
+        document.getElementById('progress-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('progress-id').value;
+            const studentId = document.getElementById('progress-student').value;
+            const date = document.getElementById('progress-date').value;
+            const surah = document.getElementById('progress-surah').value;
+            const ayahFrom = document.getElementById('progress-ayah-from').value;
+            const ayahTo = document.getElementById('progress-ayah-to').value;
+            const status = document.getElementById('progress-status').value;
+            const notes = document.getElementById('progress-notes').value;
+            
+            if (id) {
+                // Update existing progress
+                const index = progress.findIndex(p => p.id === parseInt(id));
+                if (index !== -1) {
+                    progress[index] = {
+                        id: parseInt(id),
+                        studentId: parseInt(studentId),
+                        date,
+                        surah,
+                        ayahFrom: parseInt(ayahFrom),
+                        ayahTo: parseInt(ayahTo),
+                        status,
+                        notes
+                    };
+                    
+                    showToast('Progress updated successfully');
+                }
+            } else {
+                // Add new progress
+                const newId = progress.length > 0 ? Math.max(...progress.map(p => p.id)) + 1 : 1;
+                progress.push({
+                    id: newId,
+                    studentId: parseInt(studentId),
+                    date,
+                    surah,
+                    ayahFrom: parseInt(ayahFrom),
+                    ayahTo: parseInt(ayahTo),
+                    status,
+                    notes
+                });
+                
+                showToast('Progress added successfully');
+            }
+            
+            saveData();
+            loadProgress();
+            hideProgressForm();
+        });
+
+        // Surah functions
+        function loadSurahs() {
+            const tableBody = document.getElementById('surahs-table-body');
+            tableBody.innerHTML = '';
+            
+            surahs.forEach(surah => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="p-3">${surah.number}</td>
+                    <td class="p-3">${surah.name}</td>
+                    <td class="p-3 text-right font-arabic text-xl">${surah.arabic}</td>
+                    <td class="p-3">${surah.ayat}</td>
+                    <td class="p-3">${surah.type}</td>
+                    <td class="p-3 text-right">
+                        <button onclick="editSurah(${surah.id})" class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded-lg mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteSurahPrompt(${surah.id})" class="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded-lg">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Populate surah filter in progress section
+            const surahFilter = document.getElementById('filter-surah');
+            surahFilter.innerHTML = '<option value="">All Surahs</option>';
+            surahs.forEach(surah => {
+                surahFilter.innerHTML += `<option value="${surah.name}">${surah.number}. ${surah.name}</option>`;
+            });
+        }
+
+        function showSurahForm() {
+            document.getElementById('surah-form-container').classList.remove('hidden');
+            document.getElementById('surah-form-title').textContent = 'Add New Surah';
+            document.getElementById('surah-form').reset();
+            document.getElementById('surah-id').value = '';
+        }
+
+        function hideSurahForm() {
+            document.getElementById('surah-form-container').classList.add('hidden');
+        }
+
+        function editSurah(id) {
+            const surah = surahs.find(s => s.id === id);
+            if (surah) {
+                document.getElementById('surah-form-container').classList.remove('hidden');
+                document.getElementById('surah-form-title').textContent = 'Edit Surah';
+                
+                document.getElementById('surah-id').value = surah.id;
+                document.getElementById('surah-number').value = surah.number;
+                document.getElementById('surah-name').value = surah.name;
+                document.getElementById('surah-arabic').value = surah.arabic;
+                document.getElementById('surah-ayat').value = surah.ayat;
+                document.getElementById('surah-type').value = surah.type;
+                document.getElementById('surah-juz').value = surah.juz || '';
+            }
+        }
+
+        function deleteSurahPrompt(id) {
+            const surah = surahs.find(s => s.id === id);
+            if (surah) {
+                showConfirmationModal(
+                    'Delete Surah',
+                    `Are you sure you want to delete ${surah.name}? This will also remove all related progress records.`,
+                    () => deleteSurah(id)
+                );
+            }
+        }
+
+        function deleteSurah(id) {
+            // Remove surah
+            surahs = surahs.filter(s => s.id !== id);
+            
+            // Remove progress records for this surah
+            const surahName = surahs.find(s => s.id === id)?.name;
+            if (surahName) {
+                progress = progress.filter(p => p.surah !== surahName);
+            }
+            
+            saveData();
+            loadSurahs();
+            loadProgress();
+            showToast('Surah deleted successfully');
+        }
+
+        document.getElementById('surah-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('surah-id').value;
+            const number = document.getElementById('surah-number').value;
+            const name = document.getElementById('surah-name').value;
+            const arabic = document.getElementById('surah-arabic').value;
+            const ayat = document.getElementById('surah-ayat').value;
+            const type = document.getElementById('surah-type').value;
+            const juz = document.getElementById('surah-juz').value;
+            
+            if (id) {
+                // Update existing surah
+                const index = surahs.findIndex(s => s.id === parseInt(id));
+                if (index !== -1) {
+                    surahs[index] = {
+                        id: parseInt(id),
+                        number: parseInt(number),
+                        name,
+                        arabic,
+                        ayat: parseInt(ayat),
+                        type,
+                        juz
+                    };
+                    
+                    showToast('Surah updated successfully');
+                }
+            } else {
+                // Add new surah
+                const newId = surahs.length > 0 ? Math.max(...surahs.map(s => s.id)) + 1 : 1;
+                surahs.push({
+                    id: newId,
+                    number: parseInt(number),
+                    name,
+                    arabic,
+                    ayat: parseInt(ayat),
+                    type,
+                    juz
+                });
+                
+                showToast('Surah added successfully');
+            }
+            
+            saveData();
+            loadSurahs();
+            hideSurahForm();
+        });
+
+        // Search functionality
+        document.getElementById('student-search').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#students-table-body tr');
+            
+            rows.forEach(row => {
+                const name = row.querySelector('td:first-child').textContent.toLowerCase();
+                if (name.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        document.getElementById('teacher-search').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#teachers-table-body tr');
+            
+            rows.forEach(row => {
+                const name = row.querySelector('td:first-child').textContent.toLowerCase();
+                if (name.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        document.getElementById('progress-search').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#progress-table-body tr');
+            
+            rows.forEach(row => {
+                const student = row.querySelector('td:first-child').textContent.toLowerCase();
+                const surah = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                if (student.includes(searchTerm) || surah.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        document.getElementById('surah-search').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#surahs-table-body tr');
+            
+            rows.forEach(row => {
+                const number   = row.querySelector('td:first-child').textContent.toLowerCase();
+                const nameEng  = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                const nameArab = row.querySelector('td:nth-child(3)').textContent.trim().toLowerCase();
+                if (
+                    number.includes(searchTerm) ||
+                    nameEng.includes(searchTerm) ||
+                    nameArab.includes(searchTerm)
+                ) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Initialize current date and default view
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date();
+            document.getElementById('current-date').textContent = today.toLocaleDateString('id-ID', {
+                day:   'numeric',
+                month: 'long',
+                year:  'numeric'
+            });
+            // Show Dashboard by default
+            showSection('dashboard');
+        });
+        </script>
+    </body>
+</html>
